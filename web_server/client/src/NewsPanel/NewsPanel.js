@@ -1,6 +1,7 @@
 import './NewsPanel.css';
 import NewsCard from '../NewsCard/NewsCard';
 import React from 'react';
+import _ from 'lodash';
 
 class NewsPanel extends React.Component {
   constructor() {
@@ -9,8 +10,12 @@ class NewsPanel extends React.Component {
     this.state = {news: null};
   }
 
+  // load initial news and listen to mouse scroll event
   componentDidMount() {
     this.loadMoreNews();
+    // load news is restricted to 1 call per second
+    this.loadMoreNews = _.debounce(this.loadMoreNews, 1000);
+    window.addEventListener('scroll', () => this.handleScroll());
   }
 
   render() {
@@ -27,6 +32,18 @@ class NewsPanel extends React.Component {
         </div>
       );
     }
+
+  }
+
+  // load more news when user scrolls towards page bottom
+  handleScroll() {
+    // to support old browsers
+    let scrollY = window.scrollY || window.pageYOffset ||
+                  document.documentElement.scrollTop;
+    if ( (window.innerHeight + scrollY) >= (document.body.offsetHeight - 50)) {
+      this.loadMoreNews();
+    }
+
 
   }
 
@@ -53,53 +70,19 @@ class NewsPanel extends React.Component {
     );
   }
 
+  // load news from node server into this.state.news
   loadMoreNews() {
-    const mock_news = [
-      {
-      "source": "The Wall Street Journal",
-      "title": "Berkshire Hathaway Benefits From US Tax Plan",
-      "description": "Berkshire Hathaway posted a $29 billion gain in 2017 related to changes in U.S. tax law, a one-time boost that inflated annual profits for the Omaha conglomerate.",
-      "url": "https://www.wsj.com/articles/berkshire-hathaway-posted-29-billion-gain-in-2017-from-u-s-tax-plan-1519480047",
-      "urlToImage": "https://si.wsj.net/public/resources/images/BN-XP717_3812B_TOP_20180224064100.jpg",
-      "publishedAt": "2018-02-24T18:42:00Z",
-      "digest":"3RjuEomJo26O1syZbU7OHA==\n",
-      "reason": "Recommend"
-    },
-    {
-      "source": "fortune",
-      "title": "Here's How Much Bitcoin Elon Musk Owns",
-      "description": "Tesla CEO Elon Musk isn’t exactly active in cryptocurrency. Musk revealed this week on Twitter how much Bitcoin he owns—and it’s not much.",
-      "url": "http://fortune.com/2018/02/23/bitcoin-elon-musk-value/",
-      "urlToImage": "https://fortunedotcom.files.wordpress.com/2018/01/elon-musk-tesla-silicon-valley-sex-party.jpg",
-      "publishedAt": "2018-02-23T23:26:30Z",
-      "digest":"3RjuEomJo26OadyZbU7OHA==\n",
-      "reason": "Recommend"
-    },
-    {
-      "source": "business-insider",
-      "author": "Matthew DeBord",
-      "title": "Elon Musk has no problem selling Tesla cars — but strong demand could become a problem",
-      "description": "The temptation its to lump all of Tesla's problems together into one big problem bucket, mainly because the Model 3's delays have been so extreme.",
-      "url": "http://www.businessinsider.com/tesla-strong-demand-could-backfire-become-problem-2018-2",
-      "urlToImage": "https://amp.businessinsider.com/images/5a8f32db391d941d008b491a-750-375.jpg",
-      "publishedAt": "2018-02-24T13:57:14Z",
-      "digest":"3RjuEomJo2adf6OadyZbU7OHA==\n",
-      "reason": "Today"
-    },
-    {
-      "source": "Kotaku.com",
-      "author": "Heather Alexandra",
-      "title": "Riot Discloses Loot Box Odds For League of Legends",
-      "description": "Riot Games revealed the drop rates for League of Legends’ loot crates yesterday, offering transparency for a system that until now has been opaque. This comes during a time when loot boxes have triggered a great deal of outrage among players, pundits, and eve…",
-      "url": "https://kotaku.com/riot-discloses-loot-box-odds-for-league-of-legends-1823275409",
-      "urlToImage": "https://i.kinja-img.com/gawker-media/image/upload/s--QS5t_zTw--/c_fill,fl_progressive,g_center,h_900,q_80,w_1600/j89vioglgrn74sdpzvez.png",
-      "publishedAt": "2018-02-23T20:00:00Z",
-      "digest":"3RjduEomJozf6OadyZbU7OHA==\n",
-      "reason": "Today"
-    }
-    ];
+    const news_url = 'http://' + window.location.hostname + ':3000'
+                      + '/news';
+    const request = new Request(news_url, { method:'GET' } );
+    fetch(request)
+    .then(res => res.json())
+    .then(more_news => {
+      this.setState(
+        {news: this.state.news ? this.state.news.concat(more_news): more_news}
+      );
+    });
 
-    this.setState({news: mock_news});
   }
 
 }
