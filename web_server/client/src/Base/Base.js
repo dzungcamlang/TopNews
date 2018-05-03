@@ -1,0 +1,38 @@
+import 'materialize-css/dist/css/materialize.min.css';
+import 'materialize-css/dist/js/materialize.js';
+
+import Auth from '../Auth/Auth';
+import { Link } from 'react-router';
+import React from 'react';
+
+import './Base.css';
+
+const Base = ({ children }) => (
+  <div>
+    <nav className='nav-bar indigo lighten-1'>
+      <div className='nav-wrapper'>
+        <a href='/' className='brand-logo'>   Top News</a>
+        { /* Dynamic contents depending on user authentication status */ }
+        <ul id='nav-mobile' className='right'>
+          {Auth.isUserAuthenticated() ?
+            (<div>
+              <li>{Auth.getEmail()}</li>
+              <li><Link to='/logout'>Log Out</Link></li>
+             </div>
+            )
+            :
+            (<div>
+              <li><Link to='/login'>Log In</Link></li>
+              <li><Link to='/signup'>Sign Up</Link></li>
+             </div>
+            )
+          }
+        </ul>
+      </div>
+    </nav>
+    <br />
+    { children }
+  </div>
+);
+
+export default Base;

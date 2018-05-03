@@ -1,9 +1,11 @@
+import Auth from '../Auth/Auth';
 import LoginForm from './LoginForm';
 import React from 'react';
+import PropTypes from 'prop-types';
 
 class LoginPage extends React.Component {
-  constructor() {
-    super();
+  constructor(props, context) {
+    super(props, context);
 
     this.state = {
       errors:{},
@@ -22,6 +24,8 @@ class LoginPage extends React.Component {
 
     console.log('email', email);
     console.log('password', password);
+    // fake authentication
+    Auth.authenticateUser('fake_token', email);
   }
 
   // change user email or password
@@ -42,7 +46,11 @@ class LoginPage extends React.Component {
       />
     );
   }
+}
 
+// use context wo work with top-level router
+LoginPage.contextTypes = {
+  router: PropTypes.object.isRequired
 }
 
 export default LoginPage;

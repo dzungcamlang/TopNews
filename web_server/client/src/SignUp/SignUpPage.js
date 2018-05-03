@@ -1,9 +1,10 @@
 import SignUpForm from './SignUpForm';
 import React from 'react';
+import PropTypes from 'prop-types';
 
 class SignUpPage extends React.Component {
-  constructor() {
-    super();
+  constructor(props, context) {
+    super(props, context);
 
     this.state={
       errors: {},
@@ -55,7 +56,10 @@ class SignUpPage extends React.Component {
        />
     );
   }
+}
 
+SignUpPage.contextTypes = {
+  router: PropTypes.object.isRequired
 }
 
 export default SignUpPage;
