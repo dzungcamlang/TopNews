@@ -1,0 +1,4 @@
+{
+  "mongoDbUri": "mongodb://root:root@ds215380.mlab.com:15380/topnewsusers",
+  "jwtSecret": "I change myself periodically"
+}

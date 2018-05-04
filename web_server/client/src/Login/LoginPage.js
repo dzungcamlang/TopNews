@@ -16,6 +16,7 @@ class LoginPage extends React.Component {
     };
   }
 
+  // send POST request to server and handle response
   processForm(event) {
     event.preventDefault();
 
@@ -24,8 +25,48 @@ class LoginPage extends React.Component {
 
     console.log('email', email);
     console.log('password', password);
-    // fake authentication
-    Auth.authenticateUser('fake_token', email);
+
+    // send post req to Node server
+    const url = 'http://' + window.location.hostname + ':3000' + '/auth/login';
+    const request = new Request(
+      url,
+      {
+        method: 'POST',
+        header: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email:this.state.user.email,
+          password:this.state.user.password
+        })
+      }
+    );
+
+    // handle response
+    fetch(request).then(
+      response => {
+        // User authenticated, store token and redirect to root component
+        if (response.status === 200) {
+          this.setState({
+            errors: {}
+          });
+          response.json().then(json => {
+            console.log('User login, response from server: ' + json);
+            Auth.authenticateUser(json.token, email);
+            this.context.router.replace('/');
+          });
+        } else {
+          console.log('Login failed');
+          response.json().then(json => {
+            const errors = json.errors ? json.errors : {};
+            // The error message displayed after user failed to log in
+            errors.summary = json.message;
+            this.setState({errors});
+          });
+        }
+      }
+    );
   }
 
   // change user email or password

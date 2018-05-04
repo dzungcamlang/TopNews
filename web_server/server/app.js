@@ -1,12 +1,15 @@
 
 var express = require('express');
 var path = require('path');
-
+var config = require('./config/config.json');
 
 var index = require('./routes/index');
 var news = require('./routes/news');
 
 var app = express();
+
+// connect to MongoDB and load User model
+require('./models/main.js').connect(config.mongoDbUri);
 
 // view engine setup
 app.set('views', path.join(__dirname, '../client/build/'));

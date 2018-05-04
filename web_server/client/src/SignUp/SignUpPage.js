@@ -16,6 +16,7 @@ class SignUpPage extends React.Component {
     };
   }
 
+  // POST signup form and handle response accordingly
   processForm(event) {
     event.preventDefault();
 
@@ -27,7 +28,37 @@ class SignUpPage extends React.Component {
     console.log('password', password);
     console.log('confirm_password', confirm_password);
 
-    // TODO: post signup data.
+    // post signup data.
+    const url = 'http://' + window.location.hostname + ':3000' + '/auth/signup';
+    const request = new Request(
+      url,
+      {method:'POST', headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: this.state.user.email,
+        password: this.state.user.password
+      })
+    });
+
+    // handle response
+    fetch(request).then(response => {
+      // user sign up successfully, redirect to login page
+      if (response.status === 200) {
+        this.setState(
+          {errors: {}}
+        );
+        this.context.router.replace('/login');
+      } else {
+        response.json().then(json => {
+          console.log('Signup failed, response from server: ' + json);
+          const errors = json.errors ? json.errors : {};
+          errors.summary = json.message;
+          this.setState({errors});
+        });
+      }
+    });
   }
 
   // update states.user upon input, also handle password matching
