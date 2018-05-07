@@ -1,7 +1,7 @@
 // authenticate the token sent from client to server
 
 const jwt = require('jsonwebtoken');
-const Iser = require('mongoose').model('User');
+const User = require('mongoose').model('User');
 const config = require('../config/config.json');
 
 module.exports = (req, res, next) => {

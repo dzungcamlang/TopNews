@@ -47,7 +47,7 @@ module.exports = new PassportLocalStrategy({
       const data = {
         name: user.email
       };
-
+      // null - no error 
       return done(null, token, data);
     });
 

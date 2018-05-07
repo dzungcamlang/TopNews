@@ -5,8 +5,10 @@ var config = require('./config/config.json');
 var passport = require('passport');
 var index = require('./routes/index');
 var news = require('./routes/news');
+var bodyParser = require('body-parser');
 
 var app = express();
+app.use(bodyPaser.json());
 
 // connect to MongoDB and load User model
 require('./models/main.js').connect(config.mongoDbUri);
