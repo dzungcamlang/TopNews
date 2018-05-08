@@ -1,4 +1,5 @@
-import './LoginForm.css'
+import './LoginForm.css';
+import { Link } from 'react-router';
 import React from 'react';
 
 // LoginForm receives three props from parent components and return a login form
@@ -6,6 +7,7 @@ const LoginForm = ({
   onSubmit,
   onChange,
   errors,
+  state
 }) => (
   <div className='container'>
     <div className='card-panel login-panel'>
@@ -14,6 +16,9 @@ const LoginForm = ({
         <h4 className='center-align'>Login</h4>
         {errors.summary && <div className='row'><p className='error-message'>
         {errors.summary}</p></div>}
+        {/* Show additional info for redirected users */}
+        {state && state.info && <div className='row'><p className='info'>
+        {state.info}</p></div>}
         {/* Email and error message */}
         <div className='row'>
           <div className='input-field col s12'>
@@ -40,7 +45,7 @@ const LoginForm = ({
           value='Log in' />
         </div>
         <div className='row'>
-          <p className='right-align'>New to Top News? <a href='/signup'>Sign Up</a></p>
+          <p className='right-align'>New to Top News? <Link to='/signup'>Sign Up</Link></p>
         </div>
       </form>
     </div>

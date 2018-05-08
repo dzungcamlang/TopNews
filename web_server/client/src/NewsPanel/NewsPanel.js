@@ -1,4 +1,5 @@
 import './NewsPanel.css';
+import Auth from '../Auth/Auth';
 import NewsCard from '../NewsCard/NewsCard';
 import React from 'react';
 import _ from 'lodash';
@@ -70,11 +71,17 @@ class NewsPanel extends React.Component {
     );
   }
 
-  // load news from node server into this.state.news
+  // send request to load more news into this.state.news
+  // request is sent with a token certificated from server
   loadMoreNews() {
     const news_url = 'http://' + window.location.hostname + ':3000'
                       + '/news';
-    const request = new Request(news_url, { method:'GET' } );
+    const request = new Request(news_url, {
+       method:'GET',
+       headers: {
+         'Authorization': 'bearer ' + Auth.getToken(),
+       }
+     });
     fetch(request)
     .then(res => res.json())
     .then(more_news => {

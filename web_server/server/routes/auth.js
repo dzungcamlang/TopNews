@@ -1,5 +1,5 @@
 const express = require('express');
-const passport = require('passort');
+const passport = require('passport');
 const router = express.Router();
 // validate login/signup form
 const validator = require('validator');
@@ -21,9 +21,9 @@ router.post('/signup', (req, res, next) => {
   // passport.authenticate() with custom callback
   return passport.authenticate('local-signup', (err) => {
     if (err) {
-      console.log('[Failed Signup Auth] error: ${err}');
+      console.log('[Failed Signup Auth] error: ' + err);
       // Duplicate email error, return meaningful message
-      if (err.name === 'MongoError' && err.code === 11000) {
+      if (err.code === 11000) {
         // HTTP status 409: conflict error
         return res.status(409).json({
           success: false,
@@ -36,7 +36,7 @@ router.post('/signup', (req, res, next) => {
       // Other general errors
       return res.status(400).json({
         success: false,
-        message: 'Could not process signup form' + + err.message
+        message: 'Could not process signup form' + err.message
       });
     }
 
@@ -53,6 +53,7 @@ router.post('/signup', (req, res, next) => {
 // first validate form
 // then call passport.authticate w. custom callback
 router.post('/login', (req, res, next) => {
+
   const validationResult = validateLoginForm(req.body);
   if (!validationResult.success) {
     console.log('[Form Error] failed to validate login form');
@@ -65,6 +66,7 @@ router.post('/login', (req, res, next) => {
 
   return passport.authenticate('local-login', (err, token, userData) => {
     if (err) {
+      console.log('[Passport Auth Error]: ' + err);
       // wrong email/password
       if (err.name === 'IncorrectCredentialsError') {
         return res.status(400).json({
@@ -87,7 +89,7 @@ router.post('/login', (req, res, next) => {
       user: userData
     });
   })(req, res, next);
-})
+});
 
 // auxiliary functions to validate forms
 function validateSignupForm(payload) {
@@ -118,6 +120,7 @@ function validateSignupForm(payload) {
 }
 
 function validateLoginForm(payload) {
+  console.log('[Validate Form]: ');
   console.log(payload);
   const errors = {};
   let isFormValid = true;
@@ -136,7 +139,7 @@ function validateLoginForm(payload) {
   if (!isFormValid) {
     message = 'Check the form for errors';
   }
-
+  console.log('[Validation Result]: ' + isFormValid);
   return {
     success: isFormValid,
     message,

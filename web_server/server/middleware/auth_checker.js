@@ -5,14 +5,13 @@ const User = require('mongoose').model('User');
 const config = require('../config/config.json');
 
 module.exports = (req, res, next) => {
-  console.log('[AUTH_TOKEN] req.headers: ' + req.headers);
+  console.log('[AUTH TOKEN]');
   // unauthroized request (challenge not provided)
   if (!req.headers.authorization) {
     return res.status(401).end();
   }
   // split authroization: type credential and get credential(token)
-  const token = req.headers.authroization.split(' ')[1];
-  console.log('[AUTH_TOKEN] token: ' + token);
+  const token = req.headers.authorization.split(' ')[1];
   // decode and verify token using secret key
   return jwt.verify(token, config.jwtSecret, (err, decoded) => {
 
@@ -24,6 +23,7 @@ module.exports = (req, res, next) => {
       if (userErr || !user) {
         return res.status(403).end();
       }
+      console.log('[AUTH TOKEN] success');
       return next();
     });
 

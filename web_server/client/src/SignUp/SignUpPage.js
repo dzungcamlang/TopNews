@@ -29,7 +29,7 @@ class SignUpPage extends React.Component {
     console.log('confirm_password', confirm_password);
 
     // post signup data.
-    const url = 'http://' + window.location.hostname + ':3000' + '/auth/signup';
+    const url = 'http://' + window.location.hostname + ':3000/auth/signup';
     const request = new Request(
       url,
       {method:'POST', headers: {
@@ -49,7 +49,13 @@ class SignUpPage extends React.Component {
         this.setState(
           {errors: {}}
         );
-        this.context.router.replace('/login');
+        // this.context.router.replace('/login');
+        this.context.router.push({
+          pathname: '/login',
+          state: {
+            info: 'New user signed up. You can log in now'
+          }
+        });
       } else {
         response.json().then(json => {
           console.log('Signup failed, response from server: ' + json);

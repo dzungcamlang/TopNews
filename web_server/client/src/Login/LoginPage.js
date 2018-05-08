@@ -6,13 +6,16 @@ import PropTypes from 'prop-types';
 class LoginPage extends React.Component {
   constructor(props, context) {
     super(props, context);
-
+    console.log('[Location Props States]:');
+    console.log(this.props.location.state);
+    const location_state = this.props.location.state ? this.props.location.state : {};
     this.state = {
       errors:{},
       user:{
         email:'',
         password:''
-      }
+      },
+      location_state: location_state
     };
   }
 
@@ -27,12 +30,12 @@ class LoginPage extends React.Component {
     console.log('password', password);
 
     // send post req to Node server
-    const url = 'http://' + window.location.hostname + ':3000' + '/auth/login';
+    const url = 'http://' + window.location.hostname + ':3000/auth/login';
     const request = new Request(
       url,
       {
         method: 'POST',
-        header: {
+        headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
@@ -84,6 +87,7 @@ class LoginPage extends React.Component {
         onSubmit={(e) => this.processForm(e)}
         onChange={(e) => this.changeUser(e)}
         errors={this.state.errors}
+        state={this.state.location_state}
       />
     );
   }

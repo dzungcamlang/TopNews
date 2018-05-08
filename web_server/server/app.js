@@ -3,18 +3,23 @@ var express = require('express');
 var path = require('path');
 var config = require('./config/config.json');
 var passport = require('passport');
-var index = require('./routes/index');
-var news = require('./routes/news');
 var bodyParser = require('body-parser');
 
-var app = express();
-app.use(bodyPaser.json());
+// Routers
+var index = require('./routes/index');
+var news = require('./routes/news');
+var auth = require('./routes/auth');
 
-// connect to MongoDB and load User model
+var app = express();
+app.use(bodyParser.json());
+
+// MongoDB
 require('./models/main.js').connect(config.mongoDbUri);
+// Middlewares
 var authCheckMiddleWare = require('./middleware/auth_checker');
-// use passport-local strategies
-app.use(passort.initialize());
+
+// Passport
+app.use(passport.initialize());
 var localSignupStrategy = require('./passport/signup_passport');
 var localLoginStrategy = require('./passport/login_passport');
 passport.use('local-signup', localSignupStrategy);
@@ -28,7 +33,7 @@ app.use('/static',
         express.static(path.join(__dirname, '../client/build/static')));
 
 app.use('/', index);
-
+app.use('/auth', auth);
 app.use('/news', authCheckMiddleWare);
 app.use('/news', news);
 

@@ -15,11 +15,11 @@ module.exports = new PassportLocalStrategy({
   const newUser = new User(userData);
   // MongoDB will return error if duplicate email is detected
   newUser.save((err) => {
-    console.err('[Error] Create new user: ${err}');
+    console.error(`[Error] Create new user: ${err}`);
     if (err) {
       return done(err);
     }
-    console.log('New user created: ${newUser.email}');
+    console.log(`New user created: ${newUser.email}`);
     return done(null);
   });
 });
