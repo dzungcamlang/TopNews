@@ -3,6 +3,7 @@ const passport = require('passport');
 const router = express.Router();
 // validate login/signup form
 const validator = require('validator');
+const logger = require('../logger');
 
 // signup route handler,
 // first validate form,
@@ -10,7 +11,7 @@ const validator = require('validator');
 router.post('/signup', (req, res, next) => {
   const validationResult = validateSignupForm(req.body);
   if (!validationResult.success) {
-    console.log('[Form Error] failed to validate signup form');
+    logger.error('[Validate Form]' + validationResult.errors);
     return res.status(400).json({
       success: false,
       message: validationResult.message,
@@ -21,7 +22,7 @@ router.post('/signup', (req, res, next) => {
   // passport.authenticate() with custom callback
   return passport.authenticate('local-signup', (err) => {
     if (err) {
-      console.log('[Failed Signup Auth] error: ' + err);
+      logger.error('[Signup Auth]' + err.name);
       // Duplicate email error, return meaningful message
       if (err.code === 11000) {
         // HTTP status 409: conflict error
@@ -40,6 +41,7 @@ router.post('/signup', (req, res, next) => {
       });
     }
 
+    logger.info('[Signup Auth] new user registered');
     // authentication passed
     return res.status(200).json({
       success: true,
@@ -56,7 +58,7 @@ router.post('/login', (req, res, next) => {
 
   const validationResult = validateLoginForm(req.body);
   if (!validationResult.success) {
-    console.log('[Form Error] failed to validate login form');
+
     return res.status(400).json({
       success: false,
       message: validationResult.message,
@@ -66,7 +68,7 @@ router.post('/login', (req, res, next) => {
 
   return passport.authenticate('local-login', (err, token, userData) => {
     if (err) {
-      console.log('[Passport Auth Error]: ' + err);
+      logger.error('[Login Auth]: ' + err.name);
       // wrong email/password
       if (err.name === 'IncorrectCredentialsError') {
         return res.status(400).json({
@@ -93,7 +95,8 @@ router.post('/login', (req, res, next) => {
 
 // auxiliary functions to validate forms
 function validateSignupForm(payload) {
-  console.log('[Signup Form]: ' + payload);
+  logger.debug('[Validate Form]: ');
+  logger.debug(payload);
   const errors = {};
   let isFormValid = true;
   let message = '';
@@ -109,6 +112,7 @@ function validateSignupForm(payload) {
   }
 
   if (!isFormValid) {
+    logger.debug('[Validate Form]: failed');
     message = 'Check the form for errors';
   }
 
@@ -120,8 +124,8 @@ function validateSignupForm(payload) {
 }
 
 function validateLoginForm(payload) {
-  console.log('[Validate Form]: ');
-  console.log(payload);
+  logger.debug('[Validate Form]: ');
+  logger.debug(payload);
   const errors = {};
   let isFormValid = true;
   let message = '';
@@ -137,9 +141,9 @@ function validateLoginForm(payload) {
   }
 
   if (!isFormValid) {
+    logger.debug('[Validate Form]: failed');
     message = 'Check the form for errors';
   }
-  console.log('[Validation Result]: ' + isFormValid);
   return {
     success: isFormValid,
     message,
