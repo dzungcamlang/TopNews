@@ -17,17 +17,17 @@ class CloudAMQPClient:
         self.channel.basic_publish(exchange='',
                                     routing_key=self.queue_name,
                                     body=json.dumps(message))
-        print ("[AMQP] message sent to %s:%s" % (self.queue_name, message))
+        # print ("[AMQP] message sent to %s:%s" % (self.queue_name, message))
 
     # get a message
     def getMessage(self):
         method_frame, header_frame, body = self.channel.basic_get(self.queue_name)
         if method_frame:
             self.channel.basic_ack(method_frame.delivery_tag)
-            print ("[AMQP] message receieved from %s:%s" % (self.queue_name, body))
+            # print ("[AMQP] message receieved from %s:%s" % (self.queue_name, body))
             return json.loads(body.decode('utf-8'))
         else:
-            print ("[AMQP] no message receieved")
+            print ("[%s] is empty" % self.queue_name)
             return None
     # a safer way to sleep than calling time.sleep()
     def sleep(self, seconds):
