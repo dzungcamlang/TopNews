@@ -17,7 +17,12 @@ SCRAPE_NEWS_TASK_QUEUE_NAME = 'TopNewsTitleQueue'
 DEDUPE_NEWS_TASK_QUEUE_URL = 'amqp://xhzhqriu:vo45Xa-LVUGTGeolrsXo1Rg_8eK3v1Ry@otter.rmq.cloudamqp.com/xhzhqriu'
 DEDUPE_NEWS_TASK_QUEUE_NAME = 'TopNewsQueue'
 
+# interval between two processes
 SLEEP_TIME_IN_SECONDS = 5
+# put both queues to sleep in turn for a certain times
+# total pause time (when no msg in Q) 2 * 45 * 10 = 900
+PAUSE_INTERVAL_IN_EACH_LOOP = 45
+LOOPS = 10
 
 dedupe_news_queue_client = CloudAMQPClient(DEDUPE_NEWS_TASK_QUEUE_URL, DEDUPE_NEWS_TASK_QUEUE_NAME)
 scrape_news_queue_client = CloudAMQPClient(SCRAPE_NEWS_TASK_QUEUE_URL, SCRAPE_NEWS_TASK_QUEUE_NAME)
@@ -48,8 +53,14 @@ def run():
                 except Exception as e:
                     print(e)
                     pass
-            # control scraping pace
-            scrape_news_queue_client.sleep(SLEEP_TIME_IN_SECONDS)
+                # control scraping pace is important to avoid blocking
+                scrape_news_queue_client.sleep(SLEEP_TIME_IN_SECONDS)
+            # pause for an interval if upstreaming queue is empty
+            else:
+                for i in range(LOOPS):
+                    scrape_news_queue_client.sleep(PAUSE_INTERVAL_IN_EACH_LOOP)
+                    dedupe_news_queue_client.sleep(PAUSE_INTERVAL_IN_EACH_LOOP)
+
 
 if __name__ == '__main__':
     run()

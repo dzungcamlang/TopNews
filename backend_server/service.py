@@ -23,12 +23,17 @@ def getOneNews():
     print ("getOneNews is called")
     return operations.getOneNews()
 
+'''get paginated news summary for a user'''
+def getNewsSummariesForUser(user_id, page_num):
+    print ("get news summaries for user: %s, page %s" % (user_id, page_num))
+    return operations.getNewsSummariesForUser(user_id, page_num)
 
 # setup server and register methods
 # second param is the method name exposed by server
 RPC_SERVER = SimpleJSONRPCServer((SERVER_HOST, SERVER_PORT))
 RPC_SERVER.register_function(add, 'add')
 RPC_SERVER.register_function(getOneNews, 'getOneNews')
+RPC_SERVER.register_function(getNewsSummariesForUser, 'getNewsSummariesForUser')
 
 
 # start up server

@@ -7,6 +7,8 @@ class CloudAMQPClient:
         self.queue_name = queue_name
         self.params = pika.URLParameters(cloud_amqp_url)
         self.params.socket_timeout = 3
+        self.params.blocked_connection_timeout = None
+        self.params.heartbeat = 600
         # BlockingConnection for simple, non-async queue
         self.connection = pika.BlockingConnection(self.params)
         self.channel = self.connection.channel()

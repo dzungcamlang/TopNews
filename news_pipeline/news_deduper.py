@@ -16,7 +16,10 @@ from cloudAMQP_client import CloudAMQPClient
 DEDUPE_NEWS_TASK_QUEUE_URL = 'amqp://xhzhqriu:vo45Xa-LVUGTGeolrsXo1Rg_8eK3v1Ry@otter.rmq.cloudamqp.com/xhzhqriu'
 DEDUPE_NEWS_TASK_QUEUE_NAME = 'TopNewsQueue'
 
+ # interval between two processes
 SLEEP_TIME_IN_SECONDS = 1
+# pause for an interval when queue is empty
+PAUSE_INTERVAL_IN_SECONDS = 900
 # news table in mongodb
 NEWS_TABLE_NAME = '[top-news]'
 
@@ -25,7 +28,12 @@ SAME_NEWS_SIMILARITY_THRESHOLD = 0.9
 
 cloudAMQP_client = CloudAMQPClient(DEDUPE_NEWS_TASK_QUEUE_URL, DEDUPE_NEWS_TASK_QUEUE_NAME)
 
-# dudupe messages with other news published within 24 hours' span
+
+'''
+du-duplicate news,
+algorithm: eval tf-idf matrix with other news published within 24 hours' span
+return 0 if duplicate, otherwise 1
+'''
 def handle_message(msg):
     if msg is None or not isinstance(msg, dict):
         print('message is broken')
@@ -64,26 +72,32 @@ def handle_message(msg):
         for row in range(1, rows):
             if similarity_matrix[row, 0] > SAME_NEWS_SIMILARITY_THRESHOLD:
                 print('Duplicated news, ignore')
-                return
+                return 0
 
     # not duplicate, store news to mongodb
     # transform datetime to mongodb datetime format
     task['publishedAt'] = parser.parse(task['publishedAt'])
     db[NEWS_TABLE_NAME].replace_one({'digest': task['digest']}, task, upsert=True)
-
+    return 1
 
 def run():
+    news_count = 0
     while True:
         if cloudAMQP_client is not None:
             msg = cloudAMQP_client.getMessage()
             if msg is not None:
                 try:
-                    handle_message(msg)
+                    news_count += handle_message(msg)
                 except Exception as e:
                     print(e)
                     pass
+                cloudAMQP_client.sleep(SLEEP_TIME_IN_SECONDS)
+            # pause for an interval when queue is empty
+            else:
+                print ('%d news stored to DB' % news_count)
+                news_count = 0
+                cloudAMQP_client.sleep(PAUSE_INTERVAL_IN_SECONDS)
 
-        cloudAMQP_client.sleep(SLEEP_TIME_IN_SECONDS)
 
 if __name__ == '__main__':
     run()

@@ -1,5 +1,5 @@
 # monitor news source and fetch news metadata into first AMQP
-# store news digest in Redis to avoid fetching same news multiple times  
+# store news digest in Redis to avoid fetching same news multiple times
 # powered by NewsAPI.org
 
 import datetime
@@ -75,7 +75,7 @@ def run():
                 cloudAMQP_client.sendMessage(news)
 
         print('--------------------')
-        print('Fetched %d news' % num_of_new_news)
+        print('Fetched %d news sources' % num_of_new_news)
 
         cloudAMQP_client.sleep(SLEEP_TIME_IN_SECONDS)
 

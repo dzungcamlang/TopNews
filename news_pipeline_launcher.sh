@@ -15,6 +15,7 @@ python3 news_deduper.py &
 
 
 echo '================================='
-read -p 'PRESS [ENTER] TO TERMINATE PROCESSES' PRESSKEY
+read -p $'PRESS [ENTER] TO TERMINATE PROCESSES\n' PRESSKEY
 
+# kill all background jobs
 kill $(jobs -p)
