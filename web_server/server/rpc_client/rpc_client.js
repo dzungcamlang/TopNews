@@ -14,6 +14,17 @@ function add(a, b, callback) {
   });
 }
 
+// get news summaries for a user from RPC server
+function getNewsSummariesForUser(user_id, page_num, callback) {
+  client.request('getNewsSummariesForUser', [user_id, page_num],
+    (err, response) => {
+      if (err) throw err;
+      console.log(`Get response of getNewsSummary for ${user_id}, page ${page_num}`);
+      callback(response.result);
+    });
+}
+
 module.exports = {
-  add: add
+  add: add,
+  getNewsSummariesForUser: getNewsSummariesForUser
 };

@@ -7,8 +7,14 @@ import _ from 'lodash';
 class NewsPanel extends React.Component {
   constructor() {
     super();
-
-    this.state = {news: null};
+    // news: list of news to display
+    // pageNum: page number of news when requesting more news
+    // loadedAll: if all news from backend is loaded
+    this.state = {
+                  news: null,
+                  pageNum: 1,
+                  loadedAll: false
+                  };
   }
 
   // load initial news and listen to mouse scroll event
@@ -74,8 +80,14 @@ class NewsPanel extends React.Component {
   // send request to load more news into this.state.news
   // request is sent with a token certificated from server
   loadMoreNews() {
+    // backend has no more news to serve
+    if (this.state.loadedAll == true) {
+      return;
+    }
+
     const news_url = 'http://' + window.location.hostname + ':3000'
-                      + '/news';
+                      + '/news/userId/' + Auth.getEmail()
+                      + '/pageNum/' + this.state.pageNum;
     const request = new Request(news_url, {
        method:'GET',
        headers: {
@@ -85,9 +97,14 @@ class NewsPanel extends React.Component {
     fetch(request)
     .then(res => res.json())
     .then(more_news => {
-      this.setState(
-        {news: this.state.news ? this.state.news.concat(more_news): more_news}
-      );
+      if (!more_news || more_news.length == 0) {
+        this.setState({loadedAll: true});
+      }
+
+      this.setState({
+        news: this.state.news ? this.state.news.concat(more_news): more_news,
+        pageNum: this.state.pageNum + 1,
+      });
     });
 
   }
