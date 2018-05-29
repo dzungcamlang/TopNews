@@ -24,7 +24,6 @@ NEWS_SOURCES = [
     'cnn',
     'entertainment-weekly',
     'espn',
-    'focus',
     'fortune',
     'ign',
     'polygon',
