@@ -33,7 +33,7 @@ News Classes:
 '''
 
 # Training parms
-STEPS = 200
+STEPS = 1000
 
 def main(unused_argv):
     if REMOVE_PREVIOUS_MODEL:
@@ -43,7 +43,7 @@ def main(unused_argv):
 
     # Prepare training and testing data
     df = pd.read_csv(DATA_SET_FILE, header=None)
-    train_df = df[0:1900]
+    train_df = df[0:1800]
     test_df = df.drop(train_df.index)
 
     # x - news title, y - class

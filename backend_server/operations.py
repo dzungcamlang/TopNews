@@ -8,9 +8,12 @@ import sys
 from bson.json_util import dumps
 from datetime import datetime
 
+# import packages from ../common dir
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodb_client
+
+from cloudAMQP_client import CloudAMQPClient
 
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
@@ -21,6 +24,10 @@ NEWS_LIMIT = 100
 USER_NEWS_TIME_OUT_IN_SECONDS = 60 # timeout for user's pagination info in Redis
 
 redis_client = redis.StrictRedis(REDIS_HOST, REDIS_PORT, db=0)
+
+USER_CLICK_LOG_QUEUE_URL = 'amqp://xhzhqriu:vo45Xa-LVUGTGeolrsXo1Rg_8eK3v1Ry@otter.rmq.cloudamqp.com/xhzhqriu'
+USER_CLICK_LOG_QUEUE_NAME = 'UserClickLogQueue'
+cloudAMQP_client = CloudAMQPClient(USER_CLICK_LOG_QUEUE_URL, USER_CLICK_LOG_QUEUE_NAME)
 
 def getOneNews():
     db = mongodb_client.get_db()
@@ -73,3 +80,11 @@ def getNewsSummariesForUser(user_id, page_num):
 
 
     return json.loads(dumps(sliced_news))
+
+
+'''
+    send a message of user click event to AMQP
+'''
+def logNewsClickForUser(user_id, news_id):
+    message = {'userId': user_id, 'newsId': news_id, 'timestampe': str(datetime.utcnow())}
+    cloudAMQP_client.sendMessage(message)

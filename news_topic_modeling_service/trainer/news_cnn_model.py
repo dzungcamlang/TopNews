@@ -1,14 +1,14 @@
 import tensorflow as tf
 
 EMBEDDING_SIZE = 40
-N_FILTERS = 64
-WINDOW_SIZE = 20
+N_FILTERS = 32
+WINDOW_SIZE = 10
 FILTER_SHAPE1 = [WINDOW_SIZE, EMBEDDING_SIZE]
 FILTER_SHAPE2 = [WINDOW_SIZE, N_FILTERS]
 POOLING_WINDOW = 4
 POOLING_STRIDE = 2
 
-LEARNING_RATE = 0.05
+LEARNING_RATE = 1e-3
 
 def generate_cnn_model(n_classes, n_words):
     """2 layer ConvNet to predict from sequence of words to a class."""

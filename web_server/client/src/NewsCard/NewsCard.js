@@ -1,14 +1,32 @@
 import './NewsCard.css';
 
+import Auth from '../Auth/Auth'
 import React from 'react';
 
 class NewsCard extends React.Component {
 
 
-  // open a new tab for the URL
+  // open a new tab for the URL, and send click log
   redirectToUrl(url, event) {
       event.preventDefault();
+      this.sendClickLog();
       window.open(url, '_blank');
+  }
+
+  // send user click log to server
+  sendClickLog() {
+    const url = 'http://' + window.location.hostname + ':3000'
+      + '/news/userId/' + Auth.getEmail() + '/newsId/' + this.props.news.digest;
+    // encode URI in case digest may contain non UTF-8 chars
+    const request = new Request(
+      encodeURI(url),
+      {
+        method: 'POST',
+        headers: {'Authorization': 'bearer ' + Auth.getToken()},
+      }
+    );
+    // send request, no response to deal with
+    fetch(request);
   }
 
   render() {

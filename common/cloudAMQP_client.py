@@ -2,6 +2,7 @@ import json
 import pika
 
 class CloudAMQPClient:
+
     def __init__(self, cloud_amqp_url, queue_name):
         self.cloud_amqp_url = cloud_amqp_url
         self.queue_name = queue_name
@@ -14,11 +15,14 @@ class CloudAMQPClient:
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue=queue_name)
 
-    # send a message
+    # send a message, being able to auto-reconnection 
     def sendMessage(self, message):
-        self.channel.basic_publish(exchange='',
-                                    routing_key=self.queue_name,
-                                    body=json.dumps(message))
+        try:
+            self._publish(message)
+        except pika.exceptions.ConnectionClosed:
+            self._connect()
+            self._publish(message)
+
         # print ("[AMQP] message sent to %s:%s" % (self.queue_name, message))
 
     # get a message
@@ -34,3 +38,13 @@ class CloudAMQPClient:
     # a safer way to sleep than calling time.sleep()
     def sleep(self, seconds):
         self.connection.sleep(seconds)
+
+    def _publish(self, message):
+        self.channel.basic_publish(exchange='',
+                                    routing_key=self.queue_name,
+                                    body=json.dumps(message))
+
+    def _connect(self):
+        self.connection = pika.BlockingConnection(self.params)
+        self.channel = self.connection.channel()
+        self.channel.queue_declare(queue=self.queue_name)
