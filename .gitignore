@@ -2,8 +2,8 @@
 dump.rdb
 
 # machine learning models
-model/
-
+news_topic_modeling_service/model/
+!news_topic_modeling_service/model/*.txt
 
 #Python compiling files
 __pycache__/
