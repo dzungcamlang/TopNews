@@ -1,2 +1,9 @@
 # redis dump file
 dump.rdb
+
+# machine learning models
+model/
+
+
+#Python compiling files
+__pycache__/

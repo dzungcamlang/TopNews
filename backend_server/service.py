@@ -14,15 +14,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 
 import mongodb_client
 
-''' HOLD
-
-# AMQP for logging user click event, connection is established here to keep it alive
-from cloudAMQP_client import CloudAMQPClient
-USER_CLICK_LOG_QUEUE_URL = 'amqp://xhzhqriu:vo45Xa-LVUGTGeolrsXo1Rg_8eK3v1Ry@otter.rmq.cloudamqp.com/xhzhqriu'
-USER_CLICK_LOG_QUEUE_NAME = 'UserClickLogQueue'
-cloudAMQP_client = CloudAMQPClient(USER_CLICK_LOG_QUEUE_URL, USER_CLICK_LOG_QUEUE_NAME)
-
-'''
 
 # define methods
 def add(num1, num2):

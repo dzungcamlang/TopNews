@@ -1,0 +1,37 @@
+{
+  "mongoDB": {
+    "host": "localhost",
+    "port": 27017,
+    "user": "root",
+    "password": "",
+    "db": "[top-news]",
+    "tables": {
+      "news": "[top-news]",
+      "preference": "[user-preference]"
+    }
+  },
+  "cloudAMQP": {
+    "URL": "amqp://xhzhqriu:vo45Xa-LVUGTGeolrsXo1Rg_8eK3v1Ry@otter.rmq.cloudamqp.com/xhzhqriu",
+    "queues": {
+      "news_scrape": "TopNewsTitleQueue",
+      "news_dedupe": "TopNewsQueue",
+      "user_click": "UserClickLogQueue"
+    }
+  },
+  "newsAPI": {
+    "endpoint": "https://newsapi.org/v1/",
+    "key": "f94a31e3d77144f7b4c1109125f97c15"
+  },
+  "backend_server": {
+    "URL": "localhost",
+    "port": 4040
+  },
+  "news_recommendation_server": {
+    "URL": "localhost",
+    "port": 5050
+  },
+  "news_topic_modeling_server": {
+    "URL": "localhost",
+    "port": 6060
+  }
+}

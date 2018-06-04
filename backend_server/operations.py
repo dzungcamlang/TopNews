@@ -12,6 +12,7 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodb_client
+import news_recommendation_service_client
 
 from cloudAMQP_client import CloudAMQPClient
 
@@ -42,7 +43,7 @@ def getNewsCount():
     return count
 
 '''
-    get paginated news summaries for user
+    get user-preferenced and paginated news summaries for user
     pagination info is stored in cache
     news are stored in database
     page_num: 1 based page
@@ -71,10 +72,22 @@ def getNewsSummariesForUser(user_id, page_num):
 
         sliced_news = batch_news[begin_index:end_index]
 
+    # read user preference and customize returned news list
+    #TODO: explore more complicated customization logic
+    preference = news_recommendation_service_client.getPreferenceForUser(user_id)
+    topPreference = None
+
+    if preference is not None and len(preference) > 0:
+        topPreference = preference[0]
+
+
     for news in sliced_news:
         # remove text field to save bandwidth (text doesn't display on client)
         del news['text']
-        # for fresh news, add a tag to display
+        # add a tag for user top-preference news
+        if news['class'] == topPreference:
+            news['reason'] == 'Recommended'
+        # add a tag for fresh news
         if news['publishedAt'].date() == datetime.today().date():
             news['time'] = 'today'
 
@@ -86,5 +99,5 @@ def getNewsSummariesForUser(user_id, page_num):
     send a message of user click event to AMQP
 '''
 def logNewsClickForUser(user_id, news_id):
-    message = {'userId': user_id, 'newsId': news_id, 'timestampe': str(datetime.utcnow())}
+    message = {'userId': user_id, 'newsId': news_id, 'timestamp': str(datetime.utcnow())}
     cloudAMQP_client.sendMessage(message)

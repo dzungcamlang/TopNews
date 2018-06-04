@@ -87,7 +87,7 @@ observer.schedule(ReloadModelHandler(), path=MODEL_DIR, recursive=False)
 observer.start()
 
 
-# RPC function, classify a list of news, return a list of topics
+# RPC call, classify a list of news, return a list of topics
 def classify(text):
     text_series = pd.Series([text])
     predict_x = np.array(list(vocab_processor.transform(text_series)))
