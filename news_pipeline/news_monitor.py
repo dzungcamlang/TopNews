@@ -58,6 +58,9 @@ def run():
         num_of_new_news = 0
         # for each news, check duplicity, if pass, send news to AMQP
         for news in news_list:
+            # skip when newsAPI fails to retrieve news, (e.g. news site got reformatted)
+            if news['description'] is None:
+                continue
             # news_digest is primary key of each news (for checking duplicity)
             news_digest = hashlib.md5(news['description'].encode('utf-8')).hexdigest()
 

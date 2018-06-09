@@ -9,6 +9,7 @@ import time
 
 from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer
 from tensorflow.contrib.learn.python.learn.estimators import model_fn
+from tensorflow.contrib import predictor
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -24,29 +25,37 @@ SERVER_PORT = 6060
 MODEL_DIR = '../model'
 MODEL_UPDATE_LAG_IN_SECONDS = 10
 
-N_CLASSES = 9
+N_CLASSES = 10
 
 VARS_FILE = '../model/vars'
 VOCAB_PROCESSOR_SAVE_FILE = '../model/vocab_processor_save_file'
+EXPORT_DIR_FILE = '../model/export_dir'
+MAX_DOCUMENT_LENGTH = 200
 
-MAX_DOCUMENT_LENGTH = 500
-
+EXPORT_DIR = '../model/0607_3100'
 # global variables
 n_words = 0
 vocab_processor = None
 classfier = None
+export_dir = None
 
+# load vocab processor and num of words
 def restoreVars():
     with open(VARS_FILE, 'rb') as f:
         global n_words
         n_words = pickle.load(f)
         print ('number of words %d' % n_words)
 
+    with open(EXPORT_DIR_FILE, 'rb') as f:
+        global export_dir
+        export_dir = pickle.load(f)
+        print ('load model from %s' % export_dir)
+
     global vocab_processor
     vocab_processor = learn.preprocessing.VocabularyProcessor.restore(
         VOCAB_PROCESSOR_SAVE_FILE)
 
-
+'''
 def loadModel():
     global classifier
     classifier = learn.Estimator(
@@ -61,10 +70,10 @@ def loadModel():
     y_train = train_df[0]
     classifier.evaluate(x_train, y_train)
     print('ML Model updated')
-
+'''
 
 restoreVars()
-loadModel()
+# loadModel()
 
 print("Initial model loaded")
 
@@ -79,7 +88,7 @@ class ReloadModelHandler(FileSystemEventHandler):
         print('Model update detected, reload new model')
         time.sleep(MODEL_UPDATE_LAG_IN_SECONDS)
         restoreVars()
-        loadModel()
+        # loadModel()
 
 
 observer = Observer()
@@ -87,21 +96,47 @@ observer.schedule(ReloadModelHandler(), path=MODEL_DIR, recursive=False)
 observer.start()
 
 
-# RPC call, classify a list of news, return a list of topics
+# RPC request, input a piece if news, return a classified topic
 def classify(text):
+
+    text_series = pd.Series([text])
+    predict_x = np.array(list(vocab_processor.transform(text_series))).flatten()
+    print(predict_x)
+    print (predict_x.shape)
+    with tf.Session() as sess:
+        tf.saved_model.loader.load(sess, [tf.saved_model.tag_constants.SERVING], export_dir)
+        predict_fn = predictor.from_saved_model(export_dir)
+        model_input = tf.train.Example(features=tf.train.Features(
+            feature={'words': tf.train.Feature(
+                int64_list=tf.train.Int64List(value=predict_x)
+            )}
+        ))
+        model_input = model_input.SerializeToString()
+        output_dict = predict_fn({'predictor_inputs':[model_input]})
+        predicted_class = output_dict['class'][0]
+        print (predicted_class)
+        topic = news_classes.class_map[str(predicted_class)]
+        return topic
+    '''
     text_series = pd.Series([text])
     predict_x = np.array(list(vocab_processor.transform(text_series)))
     print(predict_x)
+    print (predict_x.shape)
+    predict_fn = predictor.from_saved_model(export_dir)
 
-    y_predicted = [
-        p['class'] for p in classifier.predict(
-            predict_x, as_iterable=True)
-    ]
-    print(y_predicted[0])
+    model_input = tf.train.Example(features=tf.train.Features(
+        feature={'words': tf.train.Feature(
+            int64_list=tf.train.Int64List(value=predict_x)
+        )}
+    ))
+    model_input = model_input.SerializeToString()
+    predicted_class = predict_fn({'predictor_inputs':[model_input]})
 
-    topic = news_classes.class_map[str(y_predicted[0])]
+    print(predicted_class)
+
+    topic = news_classes.class_map[str(y_predicted['class'])]
     return topic
-
+    '''
 # set up RPC server
 RPC_SERVER = SimpleJSONRPCServer((SERVER_HOST, SERVER_PORT))
 RPC_SERVER.register_function(classify, 'classify')
