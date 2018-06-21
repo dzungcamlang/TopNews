@@ -85,7 +85,7 @@ def getNewsSummariesForUser(user_id, page_num):
         # remove text field to save bandwidth (text doesn't display on client)
         del news['text']
         # add a tag for user top-preference news
-        if news['class'] == topPreference:
+        if 'class' in news and news['class'] == topPreference:
             news['reason'] == 'Recommended'
         # add a tag for fresh news
         if news['publishedAt'].date() == datetime.today().date():

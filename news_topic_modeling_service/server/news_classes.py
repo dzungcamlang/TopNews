@@ -1,4 +1,5 @@
 class_map = {
+'0' : 'Others',
 '1' : 'Entertainment',
 '2' : 'Lifestyle',
 '3' : 'Market',

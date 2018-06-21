@@ -6,5 +6,5 @@ client = jsonrpclib.ServerProxy(URL)
 
 def classify(text):
     topic = client.classify(text)
-    print('topic: %s' % str(topic))
+    # print('topic: %s' % str(topic))
     return topic

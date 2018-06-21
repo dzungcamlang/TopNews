@@ -10,6 +10,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 
 import mongodb_client
+import news_topic_modeling_service_client
 from cloudAMQP_client import CloudAMQPClient
 
 # 2nd AMQP that stores news with body text, may contain duplicate news
@@ -77,6 +78,16 @@ def handle_message(msg):
     # not duplicate, store news to mongodb
     # transform datetime to mongodb datetime format
     task['publishedAt'] = parser.parse(task['publishedAt'])
+
+    # Classify news
+    text = task['title']
+    description = task['description']
+    if description is not None:
+        text = text + ' ' + description
+    if text is not None:
+        topic = news_topic_modeling_service_client.classify(text)
+        task['class'] = topic
+
     db[NEWS_TABLE_NAME].replace_one({'digest': task['digest']}, task, upsert=True)
     return 1
 
